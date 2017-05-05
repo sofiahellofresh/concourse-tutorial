@@ -26,7 +26,7 @@ jobs:
             - name: super-app
 
       - task: unit
-        file: ci/tasks/unit.yaml
+        file: super-app/ci/tasks/unit.yaml
 
   - name: Building & integeration testing
     plan:
