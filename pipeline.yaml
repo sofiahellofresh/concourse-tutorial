@@ -6,6 +6,7 @@ resources:
     source:
       uri: https://github.com/sofiahellofresh/concourse-tutorial.git
 
+
 jobs:
   - name: Testing
     plan:
