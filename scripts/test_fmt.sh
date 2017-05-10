@@ -1,4 +1,7 @@
 #!/bin/sh
+set -e
+echo "" | gofmt
+set +e
 
 # Just get path relative to this script and go to root
 MY_PATH="$(dirname "${0}")"     # relative
@@ -23,10 +26,5 @@ else
     echo "fmt ok"
     exit_code=0
 fi
-
-# Just sleep to simulate doing something :)
-SLEEP_TIME=10
-echo "Sleeping for ${SLEEP_TIME}"
-sleep "${SLEEP_TIME}"
 
 exit "${exit_code}"

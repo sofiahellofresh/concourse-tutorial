@@ -1,0 +1,91 @@
+---
+resource_types    :
+  - name          : pull-request
+    type          : docker-image
+    source        :
+      repository  : jtarchie/pr
+
+
+
+resources:
+  - name: super-app
+    type: pull-request
+    source:
+      repo: sofiahellofresh/concourse-tutorial
+      access_token: 
+
+jobs:
+  - name: Testing
+    plan:
+    - get: super-app
+      trigger: true
+      # Make a context
+    - put: super-app
+      params: {path: super-app, context: Unit tests, status: pending}
+
+    - aggregate:
+      - task: lint
+        config:
+          platform: linux
+          image_resource:
+            type: docker-image
+            source: {repository: golang}
+          run:
+            path: ./test_fmt.sh
+            dir: super-app/scripts
+          inputs:
+            - name: super-app
+
+      - task: unit
+        file: super-app/ci/tasks/unit.yaml
+        on_success:
+          put: super-app
+          params: {path: super-app, context: Unit tests, status: success}
+        on_failure:
+          put: super-app
+          params: {path: super-app, context: Unit tests, status: failure}
+
+  - name: Building & integeration testing
+    plan:
+    - get: super-app
+      passed: ["Testing"]
+      trigger: true
+
+
+    - task: build
+      config:
+        platform: linux
+        image_resource:
+          type: docker-image
+          source: {repository: golang}
+        run:
+          path: sh
+          args:
+          - -exc
+          - |
+            ./scripts/go_deps.sh
+            ./scripts/go_build.sh linux 0.0.1
+            mv super_*_linux_amd64 ../artifact
+          dir: super-app/
+        inputs:
+          - name: super-app
+        outputs:
+          - name: artifact
+
+    - task: integeration test
+      file: super-app/ci/tasks/integeration.yaml
+
+  - name: Master build
+    plan:
+      - get: super-app
+        passed: ["Building & integeration testing"]
+        trigger: true
+      - aggregate:
+        - task: build linux
+          file: super-app/tutorial/scenario.4/1-multi-os/tasks/build_linux.yml
+
+        - task: build darwin
+          file: super-app/tutorial/scenario.4/1-multi-os/tasks/build_darwin.yml
+
+        - task: build windows
+          file: super-app/tutorial/scenario.4/1-multi-os/tasks/build_windows.yml

@@ -1,0 +1,40 @@
+---
+resources:
+  - name: super-app
+    type: git
+    source:
+      uri: https://github.com/hellofresh/concourse-tutorial.git
+      branch: ci
+
+jobs:
+  - name: initial testing
+    plan:
+    - get: super-app
+      trigger: true
+
+    - aggregate:
+      - task: run unit
+        file: super-app/tutorial/scenario.4/1-multi-os/tasks/unit.yml
+
+      - task: run lint
+        file: super-app/tutorial/scenario.4/1-multi-os/tasks/lint.yml
+
+
+  - name: Master build
+    plan:
+    - get: super-app
+      passed: ["initial testing"]
+      trigger: true
+    - aggregate:
+      - task: build linux
+        file: super-app/tutorial/scenario.4/1-multi-os/tasks/build_linux.yml
+
+      - task: build darwin
+        file: super-app/tutorial/scenario.4/1-multi-os/tasks/build_darwin.yml
+
+      - task: build windows
+        file: super-app/tutorial/scenario.4/1-multi-os/tasks/build_windows.yml
+
+
+    # - task: integeration test
+    #   file: super-app/tutorial/scenario.4/1-multi-os/tasks/integeration.yml
