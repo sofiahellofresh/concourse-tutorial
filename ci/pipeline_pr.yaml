@@ -22,7 +22,7 @@ jobs:
       # Make a context
     - put: super-app
       params: {path: super-app, context: Unit tests, status: pending}
-      
+
     - aggregate:
       - task: lint
         config:
@@ -38,6 +38,12 @@ jobs:
 
       - task: unit
         file: super-app/ci/tasks/unit.yaml
+        on_success:
+          put: super-app
+          params: {path: super-app, context: Unit tests, status: success}
+        on_failure:
+          put: super-app
+          params: {path: super-app, context: Unit tests, status: failure}
 
   - name: Building & integeration testing
     plan:

@@ -13,5 +13,3 @@ run:
   dir: super-app/
 inputs:
   - name: super-app
-
-  
