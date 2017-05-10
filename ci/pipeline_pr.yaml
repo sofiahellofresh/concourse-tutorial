@@ -73,19 +73,19 @@ jobs:
           - name: artifact
 
     - task: integeration test
-      config:
-        platform: linux
-        image_resource:
-          type: docker-image
-          source: {repository: golang}
-        run:
-          path: sh
-          args:
-          - -exc
-          - |
-            ./artifact/super_0.0.1_linux_amd64&
-            ./super-app/scripts/test_integeration.sh  http://127.0.0.1:8080
-            kill -9 `pgrep super_`
-        inputs:
-          - name: super-app
-          - name: artifact
+      file: super-app/ci/tasks/integeration.yaml
+
+  - name: Master build
+    plan:
+      - get: super-app
+        passed: ["Building & integeration testing"]
+        trigger: true
+      - aggregate:
+        - task: build linux
+          file: super-app/tutorial/scenario.4/1-multi-os/tasks/build_linux.yml
+
+        - task: build darwin
+          file: super-app/tutorial/scenario.4/1-multi-os/tasks/build_darwin.yml
+
+        - task: build windows
+          file: super-app/tutorial/scenario.4/1-multi-os/tasks/build_windows.yml
