@@ -12,7 +12,7 @@ resources:
     type: pull-request
     source:
       repo: sofiahellofresh/concourse-tutorial
-      access_token: {{github_token}}
+      access_token: 
 
 jobs:
   - name: Testing
