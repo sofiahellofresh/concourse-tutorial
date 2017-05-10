@@ -19,6 +19,10 @@ jobs:
     plan:
     - get: super-app
       trigger: true
+      # Make a context
+    - put: super-app
+      params: {path: super-app, context: Unit tests, status: pending}
+      
     - aggregate:
       - task: lint
         config:
